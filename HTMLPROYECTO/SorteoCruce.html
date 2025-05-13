@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteo del Torneo</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header>
+        <a href="https://blogsaverroes.juntadeandalucia.es/iestorrredelosguzmanes/" target="_blank">
+            <img src="img/logo.png" alt="Logotipo Instituto" id="logo">
+        </a>
+        <h1>Sorteo del Torneo de Debate</h1>
+        <div class="contenedorBotonInicio">
+            <button onclick="goHome()">Inicio</button>
+        </div>
+    </header>
+
+    <div id="contenedorSeleccion" class="contenedor-seleccion">
+        <label for="fase">Selecciona una fase:</label>
+        <select id="fase" class="faseSelector" onchange="cargarPruebas()">
+            <option value="">-- Selecciona --</option>
+            <option value="Primera Fase">Primera Fase</option>
+            <option value="Segunda Fase">Segunda Fase</option>
+            <option value="Semifinal">Semifinal</option>
+            <option value="Final">Final</option>
+        </select>
+        
+        <label for="prueba">Selecciona una prueba:</label>
+        <select id="prueba" class="pruebaSelector">
+            <option value="">-- Primero elige una fase --</option>
+        </select>
+
+        <button class="botones" onclick="realizarSorteo()">Hacer sorteo</button>
+
+        <div id="contenedorCruces" class="contenedor-cruces">
+            <div id="listadoCruces" class="listadoCruces"></div>
+        </div>
+    </div>
+
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const pruebasPorFase = {
+            "Primera Fase": ["Mejor Introducción", "Debate inicial", "Mejor Refutación"],
+            "Segunda Fase": ["Mejor Argumentación", "Contra-Argumentación"],
+            "Semifinal": ["Mejor Estrategia"],
+            "Final": ["Defensa Final"]
+        };
+
+        function goHome() {
+            window.location.href = 'http://localhost:8080/ejemplo/';
+        }
+
+        function cargarPruebas() {
+            let fase = document.getElementById("fase").value;
+            let pruebaSelector = document.getElementById("prueba");
+            
+            pruebaSelector.innerHTML = "<option value=''>-- Selecciona una prueba --</option>";
+
+            if (pruebasPorFase[fase]) {
+                for (let prueba of pruebasPorFase[fase]) {
+                    let option = new Option(prueba, prueba);
+                    pruebaSelector.appendChild(option);
+                }
+            }
+        }
+
+        function realizarSorteo() {
+            let fase = document.getElementById("fase").value;
+            let prueba = document.getElementById("prueba").value;
+
+            if (!fase || !prueba) {
+                alert("Selecciona una fase y una prueba.");
+                return;
+            }
+
+            let url = `http://localhost:8080/ejemplo/ProyectoServlet?action=generarCruces&fase=${encodeURIComponent(fase)}&prueba=${encodeURIComponent(prueba)}`;
+            console.log("URL construida:", url);
+
+            fetch(url)
+                .then(response => {
+                    
+                    return response.json();
+                })
+                .then(data => {
+                    
+                    
+                    if (!data || data.length === 0) {
+                        alert("No se generaron cruces.");
+                        return;
+                    }
+
+                    mostrarCruces(data);
+
+                    let mensaje = "<h2 style='color: green;'>✅ Sorteo realizado correctamente.</h2>";
+                    document.getElementById("listadoCruces").innerHTML += mensaje;
+
+                    setTimeout(() => {
+                      
+                        Swal.fire({
+                            title: '¿Quieres realizar otro sorteo?',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sí',
+                            cancelButtonText: 'No',
+                            icon: 'question'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                
+                                document.getElementById("listadoCruces").innerHTML = "";
+                            } else {
+                               
+                                goHome();
+                            }
+                        });
+                    }, 5000);
+                })
+
+        function mostrarCruces(cruces) {
+            let listadoCruces = document.getElementById("listadoCruces");
+            listadoCruces.innerHTML = "<h2>Resultados del Sorteo</h2>";
+
+            if (!Array.isArray(cruces) || cruces.length === 0) {
+                listadoCruces.innerHTML += "<p>No se generaron cruces.</p>";
+                return;
+            }
+
+            let lista = "<ul>";
+            for (let cruce of cruces) {
+                lista += `<li>Equipo ${cruce.equipo1} vs Equipo ${cruce.equipo2}</li>`;
+            }
+            lista += "</ul>";
+
+            listadoCruces.innerHTML += lista;
+        }
+       }
+    </script>
+</body>
+</html>
