@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sorteo del Torneo</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -33,6 +34,11 @@
             <option value="">-- Primero elige una fase --</option>
         </select>
 
+        <h2>Equipos Participantes</h2>
+        <input type="text" id="equipoInput" placeholder="Nombre del equipo">
+        <button onclick="agregarEquipo()">Agregar Equipo</button>
+        <ul id="listaEquipos"></ul>
+
         <button class="botones" onclick="realizarSorteo()">Hacer sorteo</button>
 
         <div id="contenedorCruces" class="contenedor-cruces">
@@ -40,14 +46,9 @@
         </div>
     </div>
 
- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        const pruebasPorFase = {
-            "Primera Fase": ["Mejor Introducción", "Debate inicial", "Mejor Refutación"],
-            "Segunda Fase": ["Mejor Argumentación", "Contra-Argumentación"],
-            "Semifinal": ["Mejor Estrategia"],
-            "Final": ["Defensa Final"]
-        };
+        let equipos = [];
+        let sorteoCruces = []; 
 
         function goHome() {
             window.location.href = 'http://localhost:8080/ejemplo/';
@@ -59,6 +60,13 @@
             
             pruebaSelector.innerHTML = "<option value=''>-- Selecciona una prueba --</option>";
 
+            const pruebasPorFase = {
+                "Primera Fase": ["Mejor Introducción", "Debate inicial", "Mejor Refutación"],
+                "Segunda Fase": ["Mejor Argumentación", "Contra-Argumentación"],
+                "Semifinal": ["Mejor Estrategia"],
+                "Final": ["Defensa Final"]
+            };
+
             if (pruebasPorFase[fase]) {
                 for (let prueba of pruebasPorFase[fase]) {
                     let option = new Option(prueba, prueba);
@@ -66,56 +74,88 @@
                 }
             }
         }
+        
+    
+
+        function agregarEquipo() {
+            let equipoInput = document.getElementById("equipoInput");
+            let equipoNombre = equipoInput.value.trim();
+
+            if (equipoNombre === "") {
+                Swal.fire("❌ Introduce un nombre válido.");
+                return;
+            }
+
+            equipos.push(equipoNombre);
+            equipoInput.value = "";
+
+            actualizarListaEquipos();
+        }
+
+        function actualizarListaEquipos() {
+            let listaEquipos = document.getElementById("listaEquipos");
+            listaEquipos.innerHTML = "";
+
+            equipos.forEach(equipo => {
+                let item = document.createElement("li");
+                item.textContent = equipo;
+                listaEquipos.appendChild(item);
+            });
+        }
 
         function realizarSorteo() {
             let fase = document.getElementById("fase").value;
             let prueba = document.getElementById("prueba").value;
 
-            if (!fase || !prueba) {
-                alert("Selecciona una fase y una prueba.");
+            if (!fase || !prueba || equipos.length < 2) {
+                Swal.fire("Debes seleccionar una fase y una prueba, y agregar al menos dos equipos.");
                 return;
             }
 
             let url = `http://localhost:8080/ejemplo/ProyectoServlet?action=generarCruces&fase=${encodeURIComponent(fase)}&prueba=${encodeURIComponent(prueba)}`;
-            console.log("URL construida:", url);
 
             fetch(url)
-                .then(response => {
-                    
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    
-                    
                     if (!data || data.length === 0) {
-                        alert("No se generaron cruces.");
+                        Swal.fire("No se generaron cruces.");
                         return;
                     }
 
+                    sorteoCruces = data.map(cruce => ({
+                        fase: fase,
+                        prueba: prueba,
+                        equipo1: cruce.equipo1,
+                        equipo2: cruce.equipo2
+                    }));
+
                     mostrarCruces(data);
 
-                    let mensaje = "<h2 style='color: green;'>✅ Sorteo realizado correctamente.</h2>";
-                    document.getElementById("listadoCruces").innerHTML += mensaje;
-
-                    setTimeout(() => {
-                      
-                        Swal.fire({
-                            title: '¿Quieres realizar otro sorteo?',
-                            showCancelButton: true,
-                            confirmButtonText: 'Sí',
-                            cancelButtonText: 'No',
-                            icon: 'question'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                
-                                document.getElementById("listadoCruces").innerHTML = "";
-                            } else {
-                               
-                                goHome();
-                            }
-                        });
-                    }, 5000);
+                  
+                    Swal.fire({
+                        title: "¿Quieres guardar el sorteo?",
+                        text: "Se guardarán en la base de datos.",
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonText: "Sí, guardar",
+                        cancelButtonText: "No, cancelar"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            guardarSorteo(sorteoCruces);
+                        } else {
+                           
+                            Swal.fire("Los cruces no se han guardado.");
+                            window.location.href = 'http://localhost:8080/ejemplo/';  // Redirección al inicio
+                        }
+                    });
                 })
+                .catch(error => {
+                    console.error("Error en el sorteo:", error);
+                    Swal.fire("Hubo un error en el sorteo.");
+                });
+        }
+
+
 
         function mostrarCruces(cruces) {
             let listadoCruces = document.getElementById("listadoCruces");
@@ -134,7 +174,31 @@
 
             listadoCruces.innerHTML += lista;
         }
-       }
+
+        function guardarSorteo(sorteoCruces) {
+            fetch('http://localhost:8080/ejemplo/ProyectoServlet/guardarSorteo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ cruces: sorteoCruces })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire("Los cruces han sido guardados exitosamente.");
+                } else {
+                    Swal.fire("Hubo un error al guardar los cruces.");
+                }
+            })
+            .catch(error => {
+                console.error("Error al guardar el sorteo:", error);
+                Swal.fire("Hubo un error en la solicitud.");
+            });
+        }
+
+
+    
     </script>
 </body>
 </html>
