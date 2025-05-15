@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS TorneoDebate;
+create database TorneoDebate;
 use TorneoDebate;
  create table Fase(
  idFase int auto_increment primary key, 
@@ -106,13 +106,6 @@ SELECT e.idEquipo, c.idCruce
 FROM Equipo e, Cruce c 
 WHERE c.idFase = 1;
 
-UPDATE Cruce c
- JOIN CruceEquipo ce ON
- c.idCruce = ce.idCruce 
-SET c.idFase = 1 
-WHERE ce.idEquipo IN (SELECT 
-idEquipo FROM Equipo);
-
 SELECT e.idEquipo,
  e.nombreEquipo, c.idFase 
 FROM Equipo e 
@@ -154,3 +147,13 @@ COUNT(ce.idEquipo) AS total_equipos
 FROM Cruce c 
 JOIN CruceEquipo ce ON c.idCruce = ce.idCruce 
 GROUP BY c.idFase;
+
+ALTER TABLE Cruce ADD COLUMN idPrueba INT;
+ALTER TABLE Cruce ADD FOREIGN KEY (idPrueba) REFERENCES Prueba(idPrueba);
+
+
+
+
+select * from prueba;
+select * from cruce;
+select * from cruceEquipo;
