@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteo del Torneo</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <header>
+        <a href="https://blogsaverroes.juntadeandalucia.es/iestorrredelosguzmanes/" target="_blank">
+            <img src="img/logo.png" alt="Logotipo Instituto" id="logo">
+        </a>
+        <h1>Sorteo del Torneo de Debate</h1>
+        <div class="contenedorBotonInicio">
+            <button onclick="goHome()">Inicio</button>
+        </div>
+    </header>
+
+    <div id="contenedorSeleccion" class="contenedor-seleccion">
+        <form action="ProyectoServlet/insertarCruces" method="POST">
+        <label for="fase">Selecciona una fase:</label>
+        <select id="fase" name="fase" class="faseSelector" onchange="cargarPruebas()">
+            <option value="">-- Selecciona --</option>
+            <option value="Primera Fase">Primera Fase</option>
+            <option value="Segunda Fase">Segunda Fase</option>
+            <option value="Semifinal">Semifinal</option>
+            <option value="Final">Final</option>
+        </select>
+        
+        <label for="prueba">Selecciona una prueba:</label>
+        <select id="prueba" name="prueba" class="pruebaSelector">
+            <option value="">-- Primero elige una fase --</option>
+        </select>
+
+        <button class="botones" onclick="realizarSorteo()">Hacer sorteo</button>
+  </form>
+        <div id="contenedorCruces" class="contenedor-cruces">
+            <div id="listadoCruces" class="listadoCruces"></div>
+        </div>
+    </div>
+
+ 
+    <script>
+        const pruebasPorFase = {
+            "Primera Fase": ["Mejor Introducción", "Debate inicial", "Mejor Refutación"],
+            "Segunda Fase": ["Mejor Argumentación", "Contra-Argumentación"],
+            "Semifinal": ["Mejor Estrategia"],
+            "Final": ["Defensa Final"]
+        };
+
+        function goHome() {
+            window.location.href = 'http://localhost:8080/ejemplo/ProyectoServlet';
+        }
+
+        function cargarPruebas() {
+            let fase = document.getElementById("fase").value;
+            let pruebaSelector = document.getElementById("prueba");
+            
+            pruebaSelector.innerHTML = "<option value=''>-- Selecciona una prueba --</option>";
+
+            if (pruebasPorFase[fase]) {
+                for (let prueba of pruebasPorFase[fase]) {
+                    let option = new Option(prueba, prueba);
+                    pruebaSelector.appendChild(option);
+                }
+              } else {
+                pruebaSelector.disabled = true;
+                pruebaSelector.innerHTML = "<option value=''>-- Primero elige una fase --</option>";
+            }
+        
+
+        }
+    </script>
+</body>
+</html>

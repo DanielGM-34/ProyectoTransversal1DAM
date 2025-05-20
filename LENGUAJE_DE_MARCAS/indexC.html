@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torneo de Debate</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <a href="https://blogsaverroes.juntadeandalucia.es/iestorrredelosguzmanes/" target="_blank">
+            <img src="img/logo.png" alt="Logotipo Instituto" id="logo">
+        </a>
+        <h1>Página principal del torneo de debate</h1>
+        <div class="contenedorBotonInicio">
+            <button onclick="goHome()">Inicio</button>
+        </div>
+    </header>
+
+    <principal>
+        <div class="cajaDeBotones">
+            <button class="botones" onclick="window.location.href='/ejemplo/AltaPrueba.html'">Dar de alta una prueba</button>
+            <button class="botones" onclick="window.location.href='/ejemplo/SorteoCruce.html'">Hacer sorteo de cruces</button>
+            <button class="botones" onclick="window.location.href='/ejemplo/ListaCruces.html'">Lista de Cruces</button>
+        </div>
+    </principal>
+
+   
+    <div id="mensaje" style="color: green; font-weight: bold;"></div>
+</body>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const mensaje = params.get("mensaje");
+    const divMensaje = document.getElementById("mensaje");
+
+    if (mensaje === "exito") {
+        divMensaje.textContent = "¡Sorteo realizado con éxito!";
+        divMensaje.style.color = "green";
+    } else if (mensaje === "error") {
+        divMensaje.textContent = "Error al realizar el sorteo. Verifica los datos o la conexión.";
+        divMensaje.style.color = "red";
+    }
+
+    setTimeout(() => divMensaje.textContent = "", 4000);
+</script>
+
+
+</html>

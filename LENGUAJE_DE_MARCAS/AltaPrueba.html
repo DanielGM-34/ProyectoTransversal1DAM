@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dar de alta una prueba</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <a href="https://blogsaverroes.juntadeandalucia.es/iestorrredelosguzmanes/" target="_blank">
+            <img src="img/logo.png" alt="Logotipo Instituto" id="logo">
+        </a>
+        <h1>Dar de alta una prueba</h1>
+        <div class="contenedorBotonInicio">
+            <button class="botonInicio" onclick="goHome()">Inicio</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="contenedorFormulario">
+            <form action="ProyectoServlet/insertarPrueba" method="POST">
+                
+               <label for="nombreFase">Nombre fase:</label>
+				<select id="nombreFase" name="idFase" onchange="actualizarEquipos()" required>
+				    <option value="">Selecciona una fase</option>
+				    <option value="1">Primera Fase</option>
+				    <option value="2">Segunda Fase</option>
+				    <option value="3">Semifinal</option>
+				    <option value="4">Final</option>
+				</select>
+               
+
+                <label for="numEquipos">Número de equipos:</label>
+                <input type="number" id="numEquipos" name="numEquipos" readonly>
+
+              <label for="nombrePrueba">Nombre de la prueba:</label>
+			  <input type="text" id="nombrePrueba" name="nombrePrueba" required>
+              
+
+                <label for="numeroJueces">Número de jueces:</label>
+                <input type="number" id="numeroJueces" name="numeroJueces" min="1" required>
+
+                <label for="mejorOrador">¿Existe mejor orador?</label>
+                <select id="mejorOrador" name="mejorOrador">
+                    <option value="false">No</option>
+                    <option value="true">Sí</option>
+                </select>
+
+                <fieldset>
+                    <legend>Salas (Selecciona una o varias):</legend>
+                    <div class="marcadorSalas">
+                        <input type="checkbox" id="sala1" name="salas[]" value="Biblioteca">
+                        <label for="sala1">Biblioteca</label>
+                        <input type="checkbox" id="sala2" name="salas[]" value="Salon de actos">
+                        <label for="sala2">Salón de actos</label>
+                        <input type="checkbox" id="sala3" name="salas[]" value="Salon de idiomas">
+                        <label for="sala3">Salón de idiomas</label>
+                    </div>
+                </fieldset>
+
+                <button type="submit">Dar de alta</button>
+            </form>
+            <div id="mensaje"></div>
+        </div>
+    </main>
+
+    <script>
+    function goHome() {
+        window.location.href = "inicio.html";
+    }
+
+    const pruebasPorFase = {
+        "Primera Fase": ["Mejor Introducción", "Debate inicial", "Mejor Refutación"],
+        "Segunda Fase": ["Mejor Argumentación", "Contra-Argumentación"],
+        "Semifinal": ["Mejor Estrategia"],
+        "Final": ["Defensa Final"]
+    };
+
+    
+    function actualizarEquipos() {
+        const faseSeleccionada = document.getElementById("nombreFase").value;
+        const numEquipos = document.getElementById("numEquipos");
+
+        switch (faseSeleccionada) {
+            case "1":
+                numEquipos.value = 16;
+                break;
+            case "2":
+                numEquipos.value = 8;
+                break;
+            case "3":
+                numEquipos.value = 4;
+                break;
+            case "4":
+                numEquipos.value = 2;
+                break;
+            default:
+                numEquipos.value = "";
+        }
+    }
+
+
+    
+  
+    </script>
+</body>
+</html>
+
